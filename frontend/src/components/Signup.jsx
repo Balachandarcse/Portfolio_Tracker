@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 const SignUp = () => {
     var navigate=useNavigate();
     function HandelLogin(){
+        
         navigate('/home');
     }
     return (
