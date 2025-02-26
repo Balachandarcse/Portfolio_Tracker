@@ -18,24 +18,29 @@ mdb.connect(process.env.MONGO_URL).then(()=>{
     console.log(err)
 })
 
-app.post('/signup',async(req,res)=>{
-    const {name,email,password}=req.body;
-    var hashedPassword=await bcrypt.hash(password,10);
-    try{
-        const newCustomer=new Signup({
-        name:name,
-        email:email,
-        password:hashedPassword
-    });
-    newCustomer.save();
-    res.status(201).send("yooo!");
-    console.log("value recived")
-}catch(e){
-    res.status(401).send("yooo!")
-    console.log("unSuccessful")
+app.post("/signup", async (req, res) => {
+    const { name, email, password } = req.body;
+    var hashedPassword = await bcrypt.hash(password, 10);
+    try {
+        const existingUser = await Signup.findOne({
+            $or: [{ email }, { name }]
+        });
+        if (existingUser) {
+            return res.status(400).json({ error: existingUser.email === email ? "Email already exists" : "Username already exists" });
+        }
+        const newCustomer = new Signup({
+            name: name,
+            email: email,
+            password: hashedPassword
+        });
+        await newCustomer.save();
+        res.status(201).send("yooo!");
+        console.log("value recived")
+    } catch (e) {
+        res.status(500).send("internal error signup unsuccessful")
+        console.log("unSuccessful")
 
-}
-
+    }
 })
 
 app.get('/login',async(req,res)=>{
